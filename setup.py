@@ -3,7 +3,6 @@ from setuptools import setup
 setup(name='pystrext',
       version='0.1.1',
       description='Python string extension',
-      long_description=long_description,
       classifiers=[
           "Intended Audience :: Developers",
           "Development Status :: 4 - Beta",
