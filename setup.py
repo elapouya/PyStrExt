@@ -1,11 +1,19 @@
 from setuptools import setup
 
 setup(name='pystrext',
-      version='0.1.0',
+      version='0.1.1',
       description='Python string extension',
+      long_description=long_description,
+      classifiers=[
+          "Intended Audience :: Developers",
+          "Development Status :: 4 - Beta",
+          "Programming Language :: Python :: 2",
+          "Programming Language :: Python :: 2.7",
+      ],
+      keywords='string helpers',
       url='',
       author='Eric Lapouyade',
       author_email='elapouya@gmail.com',
-      license='MIT',
+      license='LGPL 2.1',
       packages=['pystrext'],
       zip_safe=False)
