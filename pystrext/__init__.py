@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-'''
-Created on 2 févr. 2010
+"""
+Python String Extension
 
+With pystrext module, you will be able to manipulate strings.
+
+Created on 2 févr. 2010
 @author: elapouya
-'''
+"""
 
 import cStringIO, gzip
 import re
@@ -11,6 +14,29 @@ import random
 import unicodedata
 
 def compress(s):
+    """ Compress a string with gzip
+    
+    It could be useful to compress some data without creating a file, this function do that.
+    
+    Args:
+        s (str) : The strings to compress
+        
+    Returns:
+        str : The compressed string
+        
+    Examples:
+        >>> s = "monty python" * 80
+        >>> len(s)
+        960
+        >>> c = compress(s)
+        >>> len(c)
+        41
+        >>> u = uncompress(c)
+        >>> len(u)
+        960
+        >>> s == u
+        True
+    """
     zbuf = cStringIO.StringIO()
     zfile = gzip.GzipFile(mode='wb', compresslevel=6, fileobj=zbuf)
     zfile.write(s)
@@ -20,6 +46,20 @@ def compress(s):
     return output
 
 def uncompress(s):
+    """ Uncompress a gzipped string
+    
+    You can uncompress both strings compressed with pystrext.compress() but also
+    a .gz file that has been read with open() and read().
+    
+    Args:
+        s (str) : The gzipped string to uncompress
+        
+    Returns:
+        str : The uncompressed string
+        
+    Examples:
+        see pystrext.compress()
+    """
     zbuf = cStringIO.StringIO(s)
     zfile = gzip.GzipFile(mode='rb', compresslevel=6, fileobj=zbuf)
     output=zfile.read(s)
@@ -28,28 +68,115 @@ def uncompress(s):
     return output
 
 def get_col(str,**kwargs):
+    """ Extract a column from a string
+    
+    Some strings have got many columns seperated with a separator.
+    Some strings may also have some sub-columns seperated with another separator.
+    get_col() can extract **one** column/sub-column at any depth level.
+    You have to specify one separator and one column number for each depth level you want to select.
+    
+    | Arguments name is important, it must be : col<n> and sep<n>. 
+    | Arguments are sorted so sep1/col1 is searched before sep2/col2
+    | The separator can be a regular expression (by default will be '\W+')
+    
+    Args:
+        str (str) : The listing row to parse
+        sep1 (str) : sperator 1 
+        col1 (str) : column number 1
+        sepn (str) : sperator n
+        coln (str) : column number n
+        
+    Returns:
+        str : The column/sub-column requested
+        
+    Examples:
+        >>> get_col("  4   0  95   0   0   0|   0    72k| 352k   40k|   0     0 | 435   138 ",col1=2,sep1='\|',col2=-1,sep2='\W+')
+        '40k'
+        >>> get_col("/a/b/c/basename.date.jpg",col1=-1,sep1='/',col2=1,sep2='\.')
+        'date'
     """
-    Exemple : get_col("/a/b/c/path_to_install",col=-1,sep='/',col2=0,sep2='_') donne : 'path'
-    """
-    for k,v in sorted(kwargs.items()):
-        if k[:3] == 'col':
-            sep = kwargs.get('sep%s' % k[3:],' ')
-            str = str.split(sep)[v]
+    try:
+        for k,v in sorted(kwargs.items()):
+            if k[:3] == 'col':
+                sep = kwargs.get('sep%s' % k[3:],'\W+')
+                str = re.split(sep, str, flags=re.IGNORECASE)[v]
+    except IndexError:
+        str = ''
+        
     return str
 
 def extract(str,pattern):
+    """ Search a pattern and return the first group of the first match.
+    
+    The pattern must include a group selection, ie : it must include parentheses. 
+    Only the part inside the parentheses will be returned. 
+        
+    Args:
+        str (str) : The string to search a pattern
+        pattern (RegexObject or str) : A regular expression object or a string for the pattern to search 
+        
+    Returns:
+        str : The extracted strings that matches the pattern or **None** if no match.
+        
+    Examples:
+        >>> extract('the full monty python','(\w+) python')
+        'monty'
+        >>> r=re.compile('>([^<]*)<')
+        >>> extract('this is text form : >the answer<',r)
+        'the answer'
+    """
+    if isinstance(pattern, basestring):
+        pattern = re.compile(pattern)
     m = pattern.search(str)
     if m:
         return m.group(1)
     return None
 
 def extracts(str,pattern,default):
+    """ Search a pattern and return groups of the first match.
+    
+    The pattern must include a group selections, ie : it must include parentheses. 
+    Only the part inside the parentheses will be returned. 
+        
+    Args:
+        str (str) : The string to search a pattern
+        pattern (RegexObject or str) : A regular expression object or a string for the pattern to search 
+        
+    Returns:
+        list : The extracted string for each group that matches the pattern or *default* argument if no match.
+        
+    Examples:
+        >>> h,m,s = extracts('elapse time : 5h 7m 36s','(\d+)h (\d+)m (\d+)s',['0']*3)
+        >>> h,m,s
+        ('5', '7', '36')
+    """
+    if isinstance(pattern, basestring):
+        pattern = re.compile(pattern)
     m = pattern.search(str)
     if m:
         return m.groups()
     return default
 
 def plural(str1,str2,n):
+    """ Select one string depending on a numeric value
+    
+    Args:
+        str1 (str) : The string to return if *n* <= 1
+        str2 (str) : The string to return if *n* > 1
+        n (int) : the numeric value to test 
+        
+    Returns:
+        str : str1 if *n* is 1 or less, str2 otherwise.
+        
+    Examples:
+        >>> n=1
+        >>> print "found %d %s" % (n,plural("item","items",n))
+        found 1 item
+        >>> n=4
+        >>> print "found %d %s" % (n,plural("item","items",n))
+        found 4 items
+    
+    """
     if n>1:
         return str2
     return str1
