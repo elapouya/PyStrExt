@@ -182,6 +182,27 @@ def plural(str1,str2,n):
     return str1
 
 def if_val(val,str1,str2):
+    """ Select one string depending on a value
+    
+    This function return str1 if *val* True, str2 if False.
+    
+    | str1 or str2 can be a string that may include '%(val)s' : it will replaced by *val* value.
+    | str1 or str2 can be a callable : it will be called with *val* as argument
+    
+    Args:
+        val (any type) : value to test
+        str1 (str or callable) : The string to return if *val*
+        str2 (str or callable) : The string to return if not *val*
+        
+    Returns:
+        str : str1 or str2 or str1(val) or str2(val)
+        
+    Examples:
+        >>> print if_val(3,"Item(s) found : %(val)s","No item found")
+        Item(s) found : 3
+        >>> print if_val(0,"Item(s) found : %(val)s","No item found")
+        No item found    
+    """
     if val:
         if callable(str1):
             return str1(val)
@@ -193,17 +214,50 @@ def if_val(val,str1,str2):
         else:
             return str2 % {'val' : val}
 
-def test_val(val,test_func,str1,str2):
-    if test_func(val):
-        if callable(str1):
-            return str1(val)
+def no_one_many(n,str0,str1,str2):
+    """ Select one string depending on a n equal to 0,1 or many
+    
+    This function will return : 
+    
+    * str0 if n <= 0
+    * str1 if n == 1
+    * str2 if n >= 2
+    
+    | str0, str1 or str2 can be a string that may include '%(n)s' : it will replaced by *n* value.
+    | str0, str1 or str2 can be a callable : it will be called with *n* as argument
+    
+    Args:
+        n (int) : value to test
+        str0 (str or callable) : The string to return if n <= 0
+        str1 (str or callable) : The string to return if n == 1
+        str2 (str or callable) : The string to return if n >= 2
+        
+    Returns:
+        str : str0 or str1 or str2
+        
+    Examples:
+        >>> print no_one_many(0,"No item","One item","%(n)s items")
+        No item
+        >>> print no_one_many(1,"No item","One item","%(n)s items")
+        One item
+        >>> print no_one_many(36,"No item","One item","%(n)s items")
+        36 items
+    """
+    if n <= 0:
+        if callable(str0):
+            return str0(n)
         else:
-            return str1 % {'val' : val}
+            return str0 % {'n' : n}
+    elif n == 1:
+        if callable(str1):
+            return str1(n)
+        else:
+            return str1 % {'n' : n}
     else:
         if callable(str2):
-            return str2(val)
+            return str2(n)
         else:
-            return str2 % {'val' : val}
+            return str2 % {'n' : n}
 
 def truncate(str,maxsize,max_end_str='...'):
     if len(str) > maxsize:
