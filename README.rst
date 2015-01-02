@@ -26,4 +26,4 @@ Usage::
     >>> print strext.no_one_many(36,"No item","One item","%(n)s items")
     36 items
   	
-  	... more functions available : `read the doc  <http://pystrext.readthedocs.org/en/latest/>`_
+... more functions available : `read the doc  <http://pystrext.readthedocs.org/en/latest/>`_
