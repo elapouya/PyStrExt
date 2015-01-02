@@ -6,6 +6,38 @@
 Welcome to PyStrExt's documentation!
 ====================================
 
+.. rubric:: Functions index
+
+.. currentmodule:: pystrext
+
+.. to list all function : grep "def " *.py | sed -e 's,^def ,,' -e 's,(.*,,' | sort
+.. autosummary:: 
+
+	MB_GB
+	MHz_GHz
+	base62_decode
+	base62_encode
+	compress
+	extract
+	extracts
+	file_unicode
+	file_unicode_list
+	get_col
+	if_val
+	is_email_valid
+	is_ip_valid
+	no_one_many
+	plural
+	random_password
+	remove_accents
+	slugify
+	truncate
+	uncompress
+	version_lt
+	vjust
+
+.. rubric:: Functions documentation
+	
 .. automodule:: pystrext
    :members:
 

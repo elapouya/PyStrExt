@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Python String Extension
-
-With pystrext module, you will be able to manipulate strings.
-
-Created on 2 févr. 2010
-@author: elapouya
+| Python String Extension
+| 
+| With pystrext module, you will be able to manipulate strings.
+| 
+| Created on 2 Feb. 2010
+| @author: elapouya
 """
 
 import cStringIO, gzip
@@ -259,21 +259,84 @@ def no_one_many(n,str0,str1,str2):
         else:
             return str2 % {'n' : n}
 
-def truncate(str,maxsize,max_end_str='...'):
+def truncate(str,maxsize,max_end_str='...',end_str_inside=True):
+    """ Truncate a string to a specified length and add a suffix (if truncated only)
+        
+    Args:
+        str (str) : The string to truncate
+        maxsize (int) : string maximum size before truncating and adding a suffix
+        max_end_str (str) : suffix to add when string has been truncated ('...' by default)
+        end_str_inside (bool) : Tells whether the suffix 
+            is inside the truncated string so the final string length is no more than maxsize or 
+            is outside the truncated string so the final string length is no more than maxsize + suffix's length
+        
+    Returns:
+        str : The truncated string
+        
+    Examples:
+        >>> truncate('hello world !',80)
+        >>> 'hello world !'        
+        >>> truncate('hello world !',5)
+        >>> 'he...'        
+        >>> truncate('hello world !',5,end_str_inside=False)
+        >>> 'hello...'        
+        >>> truncate('hello world !',5,' <a href="?more">more...</a>',False)
+        >>> 'hello <a href="?more">more...</a>'
+        >>> truncate('hello world !',80,' <a href="?more">more...</a>',False)
+        >>> 'hello world !'
+    
+    """
     if len(str) > maxsize:
-        return str[:max(0,maxsize-len(max_end_str))] + max_end_str
+        if end_str_inside:
+            return str[:max(0,maxsize-len(max_end_str))] + max_end_str
+        else:
+            return str[:maxsize] + max_end_str
     return str
 
-def MB_GB(str):
+def MB_GB(str,MB="MB",GB="GB"):
+    """ Transforms a string representing a memory MegaByte value into GigaBytes if value > 1024
+    
+    One can specify his own unit
+    
+    Args:
+        str (str) : string representing a value to be devided by 1024 if > 1024
+        MB (str) : string for the lowest unit
+        GB (str) : string for the highest unit
+        
+    Returns:
+        str : The converted string
+        
+    Examples:
+        >>> MB_GB('512')
+        >>> '512 MB'        
+        >>> MB_GB('2048')
+        >>> '2 GB'        
+        >>> MB_GB('2048','MBytes','GBytes')
+        >>> '2 GBytes'    
+    """
     if str:
         size = int(str)
         if size >= 1024:
-            return "%d GB" % int(size / 1024)
+            return "%d %s" % (int(size / 1024),GB)
         else:
-            return "%d MB" % size
+            return "%d %s" % (size,MB)
     return str
 
 def MHz_GHz(str):
+    """ Transforms a string representing a frequency from Mhz to Ghz if value > 1024
+        
+    Args:
+        str (str) : string representing the frequency (Mhz)
+        
+    Returns:
+        str : The converted string
+        
+    Examples:
+        >>> MHz_GHz('377')
+        >>> '377 MHz'
+        >>> MHz_GHz('2048')
+        >>> '2.048 GHz'
+    """
     if str:
         size = float(str)
         if size >= 1000:
@@ -283,11 +346,29 @@ def MHz_GHz(str):
     return str
 
 def version_lt(v1,v2):
-    """
-    Compare deux strings indiquant un n° de version du style 5.2.46 et 5.3
-    Retourne True si v1 < v2.
-    Marche avec des caractères alphanumérique : on peut tester 12.K.44 avec 12.L
-    Ne marche qu'avec des N° de sous-version pas plus grand que 10 caractères ex : 0123456789.9876543210.AZERTYUIOP marche
+    """ Compare 2 strings representing dotted version number
+    
+    The goal is to test whether a version string is older than another one. 
+    A version string looks like this : "1.45.2.1"
+    It can have as many dot you want, but the strings between dots cannot be more than 10 chars long.
+    Strings comparaison are done "dot by dot" from left to right and stops as soon as the comparaison is not equal.
+
+    Args:
+        v1 (str) : version1 string
+        v2 (str) : version2 string
+        
+    Returns:
+        bool : True is v1 older than v2
+        
+    Examples:
+        >>> version_lt('1.2.0','1.12.0')
+        >>> True
+        >>> version_lt('1.2.0','1.1.9')
+        >>> False
+        >>> version_lt('1.43c','1.43f')
+        >>> True
+        >>> version_lt('1.2.5.6.7.8','1.2.5.6.7.9')
+        >>> True
     """
     l1 = v1.split('.')
     l2 = v2.split('.')
@@ -309,10 +390,29 @@ def version_lt(v1,v2):
     return False
 
 def vjust(str,level=5,delim='.',bitsize=6,fillchar=' '):
-    """
-    Fonction qui justifie chaque sous version pour permettre un trie des version dans un ordre numerique :
-    1.12 devient : 1.    12
-    1.1  devient : 1.     1
+    """ Justify a string representing dotted version number
+    
+    The goal is to justify/format a version string in a way it can be filtered by a SQL engine : 
+    Each substrings will get a fixed length so SQL string comparaison can be used.
+    
+    Args:
+        str (str) : dotted version number
+        level (int) : number max of version substrings
+        delim (str) : separator (a dot by default)
+        bitsize (int) : substrings max length
+        fillchar (str) : the char used to fill the blanks
+        
+    Returns:
+        str : the justified string
+        
+    Examples:
+        >>> vjust('1.2')
+        >>> '     1.     2.      .      .      .      '
+        >>> vjust('1.12')
+        >>> '     1.    12.      .      .      .      '
+        >>> vjust('1.12',fillchar='0')
+        >>> '000001.000012.000000.000000.000000.000000'
+    
     """
     nb = str.count(delim)
     # on force le nombre de points à level
@@ -321,6 +421,14 @@ def vjust(str,level=5,delim='.',bitsize=6,fillchar=' '):
     return delim.join([ v.rjust(bitsize,fillchar) for v in str.split(delim)[:level+1] ])
 
 def file_unicode(f):
+    """ Convert a filename (unicode, utf-8 or iso-8859-1) into unicode
+        
+    Args:
+        f (str) : a filename
+        
+    Returns:
+        unicode : converted filename        
+    """
     if isinstance(f,unicode):
         return f
     try:
@@ -329,14 +437,48 @@ def file_unicode(f):
         return unicode(f,encoding='utf-8',errors='replace')
 
 def file_unicode_list(l):
+    """ Convert filenames into unicode strings inside a list
+        
+    Args:
+        l (list) : a filename list
+        
+    Returns:
+        list : converted filename list       
+    """
     return [file_unicode(i) for i in l]
 
 def slugify(value):
-    value = re.sub('[^\w\s-]', '', value).strip().lower()
+    """ Convert string to a slug
+        
+    Args:
+        value (str) : the string to convert
+        
+    Returns:
+        str : the slug       
+
+    Examples:
+        >>> slugify("he'l'lO  Wörld !")
+        >>> 'hello-world'
+    """
+    value = re.sub('[^\w\s-]', '', remove_accents(value)).strip().lower()
     return re.sub('[-\s]+', '-', value)
 
 base62_map = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 def base62_encode(i):
+    """ encode an integer into base62
+    
+    This can be usefull when encoding an item id to build a short url : see url shorteners like http://pack.li
+        
+    Args:
+        i (int) : the number to convert
+        
+    Returns:
+        str : base62 encoded string       
+
+    Examples:
+        >>> base62_encode(1024)
+        >>> 'GW'        
+    """
     out = ''
     while i > 0:
         r = i % 62
@@ -345,6 +487,18 @@ def base62_encode(i):
     return out
 
 def base62_decode(str):
+    """ decode a base62 encoded number
+        
+    Args:
+        str (str) : base62 string
+        
+    Returns:
+        int : decoded integer       
+
+    Examples:
+        >>> base62_decode('GW')
+        >>> 1024    
+    """
     if str is None:
         return None
     i=0
@@ -353,6 +507,18 @@ def base62_decode(str):
     return i
 
 def random_password(length=8):
+    """ Generate an "easy to memorize" random password
+        
+    Args:
+        length (int) : Password length (default : 8)
+        
+    Returns:
+        str : The random password       
+
+    Examples:
+        >>> random_password()
+        >>> 'rixerutu'
+    """
     vowel='aeiou'
     consonant='bcdfghjklmnpqrstvwxyz'
     pw=''
@@ -364,6 +530,28 @@ def random_password(length=8):
     return pw
 
 def is_ip_valid(address):
+    """ Check string is a correct IP address (ipv4)
+    
+    It just checks IP string syntax. Useful for form checking.
+        
+    Args:
+        address (str) : IP address string to check
+        
+    Returns:
+        bool : True if IP string syntax is correct.       
+
+    Examples:
+        >>> is_ip_valid('12.23.34.45')
+        >>> True
+        >>> is_ip_valid('12.23.34.345')
+        >>> False
+        >>> is_ip_valid('12.23.34')
+        >>> False
+        >>> is_ip_valid('12.23.34a.45')
+        >>> False
+        >>> is_ip_valid('12.23.34.45.56')
+        >>> False
+    """
     if " " in address:
         return False
     parts = address.split(".")
@@ -378,14 +566,43 @@ def is_ip_valid(address):
     return True
 
 def is_email_valid(email):
-    return re.match(r'[^@]+@[^@]+\.[^@]+', email)
+    """ Check string is a correct email address
+    
+    It just checks string syntax. Useful for form checking.
+        
+    Args:
+        address (str) : email address string to check
+        
+    Returns:
+        bool : True if email string syntax is correct.       
+
+    Examples:
+        >>> is_email_valid('hello@world.com')
+        >>> True
+        >>> is_email_valid('hello@world')
+        >>> False
+        >>> is_email_valid('hello world')
+        >>> False
+    """
+    return bool(re.match(r'[^@]+@[^@]+\.[^@]+', email))
 
 
 def remove_accents(s):
-   """Removes all accents from the string"""
-   if isinstance(s,str):
-       s = unicode(s,"utf8","replace")
-   if isinstance(s,unicode):
-       s=unicodedata.normalize('NFD',s)
-       return s.encode('ascii','ignore')
-   return s
+    """ Remove accents
+    
+    Args:
+        s (str) : string to convert
+        
+    Returns:
+        str : same string without any accent       
+
+    Examples:
+        >>> remove_accents('Et voilà !')
+        >>> 'Et voila !'
+    """
+    if isinstance(s,str):
+         s = unicode(s,"utf8","replace")
+    if isinstance(s,unicode):
+         s=unicodedata.normalize('NFD',s)
+         return s.encode('ascii','ignore')
+    return s
