@@ -14,11 +14,12 @@ To install::
 
 Usage::
 
-	>>> import pystrext as strext
+    >>> import pystrext as strext
 
     >>> h,m,s = strext.extracts('elapse time : 5h 7m 36s','(\d+)h (\d+)m (\d+)s',['0']*3)
     >>> h,m,s
     ('5', '7', '36')
+    ...
 
 .. rubric:: Functions index
 
