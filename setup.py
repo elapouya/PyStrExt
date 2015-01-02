@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pystrext',
-      version='0.1.5',
+      version='0.1.6',
       description='Python string extension',
       classifiers=[
           "Intended Audience :: Developers",
