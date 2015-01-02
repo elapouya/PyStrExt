@@ -1,7 +1,29 @@
 from setuptools import setup
 
+def read(*names):
+    values = dict()
+    for name in names:
+        filename = name + '.rst'
+        if os.path.isfile(filename):
+            fd = open(filename)
+            value = fd.read()
+            fd.close()
+        else:
+            value = ''
+        values[name] = value
+    return values
+
+
+long_description = """
+%(README)s
+
+News
+====
+%(CHANGES)s
+""" % read('README', 'CHANGES')
+
 setup(name='pystrext',
-      version='0.1.6',
+      version='0.1.7',
       description='Python string extension',
       classifiers=[
           "Intended Audience :: Developers",
