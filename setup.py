@@ -39,6 +39,6 @@ setup(name='pystrext',
       author_email='elapouya@gmail.com',
       license='LGPL 2.1',
       packages=['pystrext'],
-      install_requires = ['Sphinx', 'sphinxcontrib-napoleon'],
+      install_requires = ['Sphinx==1.2.3', 'sphinxcontrib-napoleon'],
       eager_resources = ['docs'],
       zip_safe=False)
